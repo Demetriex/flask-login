@@ -19,7 +19,6 @@ jobs:
           - {name: '3.6', python: '3.6', tox: py36}
           - {name: '3.5', python: '3.5', tox: py35}
           - {name: PyPy, python: pypy3, tox: pypy3}
-          - {name: '2.7', python: '2.7', tox: py27}
           - {name: Style, python: '3.8', tox: style}
     steps:
       - uses: actions/checkout@v2
@@ -38,7 +37,22 @@ jobs:
           key: pip|${{ runner.os }}|${{ matrix.python }}|${{ hashFiles('*requirements.txt') }}
       - run: pip install tox coveralls
       - run: tox -e ${{ matrix.tox }}
-      - run: coveralls
+      - run: coveralls --service=github
         env:
-          COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
-        if: ${{ matrix.tox != 'style' }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          COVERALLS_FLAG_NAME: ${{ matrix.name }}
+          COVERALLS_PARALLEL: true
+        if: ${{ matrix.name != 'style' }}
+  finish:
+    needs: tests
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/setup-python@v2
+      with:
+        python-version: 3.8
+    - name: Finished
+      run: |
+        pip install --upgrade coveralls
+        coveralls --finish
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
