@@ -42,6 +42,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           COVERALLS_FLAG_NAME: ${{ matrix.name }}
           COVERALLS_PARALLEL: true
+        if: ${{ matrix.name != 'style' }}
   finish:
     needs: tests
     runs-on: ubuntu-latest
